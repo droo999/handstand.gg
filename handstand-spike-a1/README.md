@@ -40,11 +40,8 @@ warn; camera access may or may not work with it.
 
 1. **Level gate.** Tap Start session, allow motion access. Tilt the phone clockwise: the
    horizon line should rotate counter-clockwise on screen (staying level with the world).
-   If it moves the wrong way, negate `roll` in `LevelIndicator.tsx`. Then aim the camera
-   upward: the readout must say "Camera up" (and the dot moves up). If it says "down", flip
-   `GRAVITY_READS_INVERTED` in `useLevel.ts`. The gate goes green after about 0.6 s within
-   the limits in `DEFAULT_LIMITS` (roll ±2°, camera up to 6° above and 3° below the
-   horizon), and Start recording enables. Adjust the limits there.
+   If it moves the wrong way, negate `roll` in `LevelIndicator.tsx`. It should go green
+   after about 0.6 s within ±1.5°, and Start recording should enable.
 2. **Frame rate.** Watch the fps and ms line under the preview. Try lite vs full, and
    480/640/960 px. Note the numbers for the iPhone 14.
 3. **Upside down, rotation off.** Prop the phone side-on, start recording, do handstands
