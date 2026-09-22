@@ -63,8 +63,7 @@ type ModelState =
 
 const LAYOUT =
   "Each frame's lm array holds 33 MediaPipe landmarks as [x, y, z, visibility] in order, " +
-  "x/y normalized 0-1 in the original camera frame (not mirrored, not rotated). t is ms since recording started. " +
-  "Tilt: roll = degrees the screen is rotated from level; pitch = degrees the camera points above the horizon (negative = below).";
+  "x/y normalized 0-1 in the original camera frame (not mirrored, not rotated). t is ms since recording started.";
 
 function formatTime(ms: number) {
   const total = Math.floor(ms / 1000);
@@ -84,7 +83,7 @@ export default function App() {
   const [notice, setNotice] = useState<string | null>(null);
 
   const camera = useCamera();
-  const level = useLevel(phase === "leveling", { facing: settings.facing });
+  const level = useLevel(phase === "leveling");
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   // The detection loop reads these instead of React state, so it never re-subscribes.
@@ -416,7 +415,7 @@ export default function App() {
             <canvas ref={canvasRef} />
           </div>
           {phase === "leveling" && !settings.bypassLevel && level.permission === "granted" && (
-            <LevelIndicator tilt={level.tilt} isLevel={level.isLevel} limits={level.limits} hasData={level.hasData} />
+            <LevelIndicator tilt={level.tilt} isLevel={level.isLevel} toleranceDeg={level.toleranceDeg} hasData={level.hasData} />
           )}
           {phase === "recording" && <div className="rec-badge">Recording {formatTime(elapsed)}</div>}
           {camera.status === "starting" && <div className="stage-note">Starting camera…</div>}
