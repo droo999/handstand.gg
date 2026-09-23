@@ -104,8 +104,10 @@ video.preview-off { opacity: 0; }
 .chips { display: flex; flex-wrap: wrap; gap: 8px; margin: 10px 0; }
 .chip { min-height: 38px; padding: 6px 12px; font-size: 0.85rem; font-weight: 500; background: transparent; border-color: var(--line); color: var(--muted); }
 .chip.on { color: var(--text); border-color: var(--left); }
-.actions { display: flex; gap: 10px; }
-.actions .primary, .actions .danger { flex: 1; }
+.actions { display: flex; gap: 10px; margin-top: 10px; }
+.actions .primary, .actions .danger, .actions .ghost { flex: 1; }
+
+.review-video { width: 100%; max-height: 50dvh; border-radius: 10px; background: #05070a; margin-bottom: 14px; }
 
 .summary { display: grid; grid-template-columns: 1fr 1fr; gap: 10px 16px; margin: 0 0 14px; }
 .summary div { border-top: 1px solid var(--line); padding-top: 6px; }

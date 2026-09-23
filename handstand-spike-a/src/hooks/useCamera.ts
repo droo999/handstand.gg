@@ -9,11 +9,13 @@ export function useCamera() {
   const [status, setStatus] = useState<CameraStatus>("idle");
   const [error, setError] = useState<string | null>(null);
   const [size, setSize] = useState({ width: 0, height: 0 });
+  const [stream, setStream] = useState<MediaStream | null>(null);
 
   const stop = useCallback(() => {
     streamRef.current?.getTracks().forEach((t) => t.stop());
     streamRef.current = null;
     if (videoRef.current) videoRef.current.srcObject = null;
+    setStream(null);
     setStatus("idle");
   }, []);
 
@@ -38,6 +40,7 @@ export function useCamera() {
         video.srcObject = stream;
         await video.play();
         setSize({ width: video.videoWidth, height: video.videoHeight });
+        setStream(stream);
         setStatus("live");
       } catch (err) {
         setError(describeCameraError(err));
@@ -49,7 +52,7 @@ export function useCamera() {
 
   useEffect(() => stop, [stop]);
 
-  return { videoRef, status, error, size, start, stop };
+  return { videoRef, status, error, size, stream, start, stop };
 }
 
 function describeCameraError(err: unknown): string {

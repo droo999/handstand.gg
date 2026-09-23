@@ -1,4 +1,5 @@
 import type { Landmark } from "./pose";
+import type { StorageBackend } from "./videoStore";
 
 /** One inference result. `lm` is flat: x, y, z, visibility for each of the 33 landmarks. */
 export type FrameRecord = { t: number; lm: number[] | null };
@@ -8,15 +9,32 @@ export type TiltSample = { t: number; roll: number; pitch: number };
 /** Page visibility changes while recording (e.g. app switched away, screen locked). */
 export type LogEvent = { t: number; type: string };
 
+/** Periodic snapshot of the chunked-recording state, taken while recording (spike B). */
+export type StorageSample = {
+  t: number;
+  chunkCount: number;
+  totalBytes: number;
+  quotaUsage: number | null;
+  quotaTotal: number | null;
+};
+
+export type VideoRecordingInfo = {
+  mimeType: string;
+  backend: StorageBackend;
+  chunkCount: number;
+  totalBytes: number;
+} | null;
+
 export type SpikeExport = {
-  schema: "handstand-spike-a/v1";
+  schema: "handstand-spike-a/v2";
   createdAt: string;
   userAgent: string;
   layout: string;
-  video: { width: number; height: number; facing: "user" | "environment" };
+  video: { width: number; height: number; facing: "user" | "environment"; recording: VideoRecordingInfo };
   settings: Record<string, unknown>;
   tiltAtStart: { roll: number; pitch: number } | null;
   tiltSamples: TiltSample[];
+  storageSamples: StorageSample[];
   events: LogEvent[];
   summary: { durationMs: number; frames: number; poseFrames: number; avgInferenceMs: number };
   frames: FrameRecord[];
@@ -53,6 +71,31 @@ export async function shareOrDownload(data: SpikeExport): Promise<void> {
   }
 
   const url = URL.createObjectURL(new Blob([json], { type: "application/json" }));
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = name;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 10_000);
+}
+
+/** Same share-sheet-first approach as `shareOrDownload`, for the assembled recording. */
+export async function shareOrDownloadVideo(blob: Blob, mimeType: string): Promise<void> {
+  const ext = mimeType.includes("mp4") ? "mp4" : "webm";
+  const name = `handstand-spike-${new Date().toISOString().replace(/[:.]/g, "-")}.${ext}`;
+  const file = new File([blob], name, { type: mimeType });
+
+  if (navigator.canShare?.({ files: [file] })) {
+    try {
+      await navigator.share({ files: [file], title: name });
+      return;
+    } catch (err) {
+      if ((err as DOMException).name === "AbortError") return; // user closed the sheet
+    }
+  }
+
+  const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url;
   a.download = name;

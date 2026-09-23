@@ -57,7 +57,7 @@ A computer-vision project for my portfolio. It tracks handstand alignment from s
 ## Roadmap
 
 1. **Spike A (on the iPhone):** camera, level gate, live stick figure, 180° rotation toggle, fps counter, landmark export. Checks that pose tracking holds up upside down.
-2. **Spike B:** a 20-30 minute session recorded in chunks. Checks memory, screen sleep, backgrounding, and how well landmarks line up with the video. This is the go/no-go for the PWA approach.
+2. **Spike B:** a 20-30 minute session recorded in chunks. Checks memory, screen sleep, backgrounding, and how well landmarks line up with the video. This is the go/no-go for the PWA approach. Built into the `handstand-spike-a` app rather than a separate folder, since it reuses A's camera/level/pose pipeline directly.
 3. **Spike C:** cutting a standalone playable clip out of a session recording (WebCodecs or ffmpeg.wasm re-encode of a short range).
 4. **Session recorder:** session start, level gate, record, and save video and landmarks locally.
 5. **Handstand detection engine:** landmarks in, handstands and metrics out, tested against sessions I label by hand.
