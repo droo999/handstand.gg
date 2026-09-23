@@ -83,7 +83,8 @@ export default function App() {
   const [notice, setNotice] = useState<string | null>(null);
 
   const camera = useCamera();
-  const level = useLevel(phase === "leveling");
+  // Green range: roll within ±1.5°, pitch (incline/decline) allowed up to ±26°.
+  const level = useLevel(phase === "leveling", { toleranceDeg: 1.5, maxPitchDeg: 26 });
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   // The detection loop reads these instead of React state, so it never re-subscribes.
