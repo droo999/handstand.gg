@@ -9,7 +9,7 @@ export type Tilt = { roll: number; pitch: number };
  *    so portrait, landscape and upside-down all read 0 when level. This also makes the result
  *    independent of iOS/Android sign conventions for accelerationIncludingGravity.
  *  - pitch: how far the camera axis points above/below the horizon (0 = phone vertical).
- *    The SIGN of pitch differs between iOS and Android (only |pitch| is used for the gate).
+ *    The SIGN of pitch differs between iOS and Android. Pitch is logged but not gated on.
  */
 export function computeTilt(x: number, y: number, z: number): Tilt {
   const inPlane = (Math.atan2(x, y) * 180) / Math.PI;
@@ -33,13 +33,17 @@ export async function requestMotionPermission(): Promise<MotionPermission> {
   return "granted";
 }
 
-type Options = { toleranceDeg?: number; holdMs?: number };
+type Options = { toleranceDeg?: number; holdMs?: number; maxPitchDeg?: number };
 
 /**
- * Level gate: `isLevel` becomes true once |roll| and |pitch| stay within tolerance for
- * `holdMs`, and false as soon as either leaves it.
+ * Level gate: `isLevel` becomes true once |roll| stays within tolerance for `holdMs`, and false
+ * as soon as it leaves it. Inclining or declining the phone (pitch) is allowed, up to
+ * `maxPitchDeg`: near flat, almost no gravity falls in the screen plane, so roll is just noise.
  */
-export function useLevel(active: boolean, { toleranceDeg = 1.5, holdMs = 600 }: Options = {}) {
+export function useLevel(
+  active: boolean,
+  { toleranceDeg = 1.5, holdMs = 600, maxPitchDeg = 26 }: Options = {},
+) {
   const [permission, setPermission] = useState<MotionPermission>("unknown");
   const [tilt, setTilt] = useState<Tilt>({ roll: 0, pitch: 0 });
   const [isLevel, setIsLevel] = useState(false);
@@ -80,7 +84,7 @@ export function useLevel(active: boolean, { toleranceDeg = 1.5, holdMs = 600 }: 
       latest.current = t;
 
       const now = performance.now();
-      const within = Math.abs(t.roll) <= toleranceDeg && Math.abs(t.pitch) <= toleranceDeg;
+      const within = Math.abs(t.roll) <= toleranceDeg && Math.abs(t.pitch) <= maxPitchDeg;
       if (within) {
         if (levelSince.current == null) levelSince.current = now;
       } else {
@@ -97,7 +101,7 @@ export function useLevel(active: boolean, { toleranceDeg = 1.5, holdMs = 600 }: 
 
     window.addEventListener("devicemotion", onMotion);
     return () => window.removeEventListener("devicemotion", onMotion);
-  }, [active, permission, toleranceDeg, holdMs]);
+  }, [active, permission, toleranceDeg, holdMs, maxPitchDeg]);
 
-  return { permission, request, tilt, isLevel, hasData, latest, toleranceDeg };
+  return { permission, request, tilt, isLevel, hasData, latest, toleranceDeg, maxPitchDeg };
 }

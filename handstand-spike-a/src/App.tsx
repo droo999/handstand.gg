@@ -415,7 +415,7 @@ export default function App() {
             <canvas ref={canvasRef} />
           </div>
           {phase === "leveling" && !settings.bypassLevel && level.permission === "granted" && (
-            <LevelIndicator tilt={level.tilt} isLevel={level.isLevel} toleranceDeg={level.toleranceDeg} hasData={level.hasData} />
+            <LevelIndicator tilt={level.tilt} isLevel={level.isLevel} maxPitchDeg={level.maxPitchDeg} hasData={level.hasData} />
           )}
           {phase === "recording" && <div className="rec-badge">Recording {formatTime(elapsed)}</div>}
           {camera.status === "starting" && <div className="stage-note">Starting camera…</div>}

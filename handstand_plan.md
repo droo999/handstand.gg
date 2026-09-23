@@ -10,7 +10,7 @@ A computer-vision project for my portfolio. It tracks handstand alignment from s
 
 ### Sessions and recording
 - Users record **sessions** (many handstands in one recording), filmed from the side.
-- **Level gate:** before recording, the camera view shows a horizontal line indicator that changes as the phone tilts and turns green when the phone is straight. Recording can't start until it's level.
+- **Level gate:** before recording, the camera view shows a horizontal line indicator that changes as the phone tilts and turns green when the phone is straight. Recording can't start until it's level. Only left/right tilt (roll) is gated; inclining or declining the phone (pitch) is allowed.
 - **No overlay on the camera view.** Once recording starts, a live skeletal outline of the body (trapezoid torso, line limbs) mirrors the user's movements.
 - No audio feedback.
 
@@ -46,7 +46,7 @@ A computer-vision project for my portfolio. It tracks handstand alignment from s
 | Hosting | Free tier on Vercel or Netlify (HTTPS is required for camera and motion sensors) |
 | Pose estimation | MediaPipe Pose Landmarker, on-device, self-hosted. Test rotating frames 180° so inverted poses look upright to the model |
 | Camera and recording | `getUserMedia` plus `MediaRecorder` on the raw camera stream. Video is saved in chunks to browser storage (OPFS/IndexedDB) to handle long sessions. Wake Lock keeps the screen on |
-| Level gate | `devicemotion` gravity vector (roll and pitch), smoothed, with an iOS permission tap |
+| Level gate | `devicemotion` gravity vector, smoothed; gates on roll only (pitch is logged), with an iOS permission tap |
 | Detection and metrics | Pure TypeScript functions that run on the saved landmark time series after the session: a state machine with hysteresis, backtracking to find hand placement, angles, and center of mass from segment mass fractions |
 | Playback overlays | Drawn at playback time from the stored landmarks |
 | Backend | Supabase free tier (Postgres, Auth, Storage, row-level security) |
