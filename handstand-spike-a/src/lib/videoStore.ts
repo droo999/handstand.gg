@@ -45,11 +45,20 @@ async function probeBackend(): Promise<StorageBackend> {
   try {
     if ("storage" in navigator && "getDirectory" in navigator.storage) {
       const root = await navigator.storage.getDirectory();
-      // Some browsers expose the API but throw on use (e.g. in a locked-down iframe);
-      // confirm we can actually create and remove an entry before trusting it.
-      await root.getDirectoryHandle("__probe__", { create: true });
-      await root.removeEntry("__probe__", { recursive: true });
-      return "opfs";
+      const dir = await root.getDirectoryHandle("__probe__", { create: true });
+      try {
+        // Directory creation alone isn't enough: some browsers (Safari/WebKit as of at
+        // least iOS 17) support OPFS directories but not `createWritable()` on the main
+        // thread (only sync access handles inside a Worker), so this must actually try a
+        // full write, not just check that the method exists.
+        const handle = await dir.getFileHandle("probe.txt", { create: true });
+        const writable = await handle.createWritable();
+        await writable.write("probe");
+        await writable.close();
+        return "opfs";
+      } finally {
+        await root.removeEntry("__probe__", { recursive: true }).catch(() => {});
+      }
     }
   } catch {
     /* fall through to IndexedDB */
